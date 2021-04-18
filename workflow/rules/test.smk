@@ -39,8 +39,9 @@ rule combine_fastas:
     shell:
          "python3 workflow/scripts/combine_fasta.py "
          "results/test/combine_fasta/{wildcards.sample} "
-         "{input.mask_regions} "
-         "{input.input_files} > {log.stdout} 2> {log.stderr}"
+         "{input.input_files} "
+         "--masked_regions {input.mask_regions} "
+         "> {log.stdout} 2> {log.stderr}"
 
 
 rule process_genbank:
@@ -57,7 +58,7 @@ rule process_genbank:
         "../envs/test.yaml"
     shell:
          "python3 workflow/scripts/parse_genbank.py {input} "
-         "--outfmt .fna "
+         "--outfmt fna "
          " > {output} 2> {log.stderr}"
 
 rule sample_fastqs:
@@ -70,8 +71,15 @@ rule sample_fastqs:
     log:
         stdout="results/test/logs/sample_fastqs/{sample}.log",
         stderr="results/test/logs/sample_fastqs/{sample}.err"
+    params:
+        sample_param_string = lambda wildcards: lookup_in_config_persample(config,
+        pep, ["test", "sample_fastqs", "sample_param_string"], wildcards.sample,
+        default = "--rng_seed 42")
     conda:
         "../envs/test.yaml"
     shell:
-        "python3 workflow/scripts/FastqSim.py "
+        "python3 workflow/scripts/FastqSim.py {input} "
+        "results/test/input_fastqs/{wildcards.sample} "
+        "{params.sample_param_string} "
+        "> {log.stdout} 2> {log.stderr}"
         

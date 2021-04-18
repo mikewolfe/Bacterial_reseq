@@ -36,37 +36,51 @@ for your system
 [here](https://docs.conda.io/en/latest/miniconda.html).
 
 Once `miniconda` is installed, both `snakemake` and `peppy` can be
-installed in their own environment easily using: ``` conda create -n
-ChIPseq_pipeline snakemake=5.24.2 peppy conda activate
-ChIPseq_pipeline ```
+installed in their own environment easily using: 
+
+``` 
+conda create -n Bacterial_reseq snakemake=5.24.2 peppy 
+conda activate Bacterial_reseq
+```
 
 **Note** If you are using a computational cluster that requires job
 management software, you may want to install that with your
 environment as well.  For example, if you are using an
 `htcondor`-managed server you would instead create your environment
-like so: ``` conda create -n Bacterial_reseq snakemake=5.24.2 peppy
-htcondor=8.9.5 conda activate Bacterial_reseq ```
+like so: 
 
-Now you can pull the pipeline from github using: ``` git clone
-https://github.com/mikewolfe/Bacterial_reseq ```
+``` 
+conda create -n Bacterial_reseq snakemake=5.24.2 peppy htcondor=8.9.5 
+conda activate Bacterial_reseq 
+```
+
+Now you can pull the pipeline from GitHub using: 
+``` 
+git clone https://github.com/mikewolfe/Bacterial_reseq 
+```
 
 And you can change into the newly cloned `Bacterial_reseq` directory
-and test your installation with: ``` snakemake --use-conda --cores 10
+and test your installation with: 
+``` 
+snakemake --use-conda --cores 10
 ```
 
 Or if using a cluster with job management software you can run this
 with an environment-specific
 [profile](https://snakemake.readthedocs.io/en/v5.1.4/executable.html#profiles).
-For example: ``` snakemake --use-conda --cores 10 --profile htcondor
+For example: 
+``` 
+snakemake --use-conda --cores 10 --profile htcondor
 ```
 
-
-This will run the entire pipeline using the provided test data
-consisting of small example fastqs heavily downsampled from real data.
+This will create a small test data set consisting of example fastqs
+sampled uniformly from genomes where rpoA rpoB and rpoC have been
+deleted and then run the pipeline on those test datasets.
 
 The first time you run the pipeline it will need to create dedicated
 `conda` environments for each module which will take some time.
-Afterwards, it will run quickly. For more information on using `conda`
+Afterwards, it will run in about 20-30 minutes, most of which is time
+needed to create the test data. For more information on using `conda`
 with `snakemake` including how to set things up to run offline check
 out the documentation
 [here](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#integrated-package-management).
@@ -128,7 +142,7 @@ options control.
 ## Rules
 
 The pipeline is organized into modules each of which runs a specific
-task needed for ChIP-seq analysis.
+task needed for analysis.
 
 - [workflow/rules/preprocessing.smk](workflow/rules/preprocessing.smk)
   includes rules for trimming raw reads for adapters and quality
@@ -137,6 +151,8 @@ task needed for ChIP-seq analysis.
 - [workflow/rules/quality_control.smk](workflow/rules/quality_control.smk)
   includes rules for performing summarizing quality control on the
   reads themselves
+- [workflow/rules/test.smk](workflow/rules/test.smk)
+  includes rules for creating the small test set.
 
 Each of these rules can be run individually using:
 ```

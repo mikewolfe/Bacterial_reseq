@@ -2,7 +2,6 @@ channels:
     - conda-forge
     - bioconda
 dependencies:
-    - ncbi-acc-download=0.2.6
+    - ncbi-acc-download=0.2.7
     - biopython=1.76
-    - python=3.9.1
     - numpy=1.20.2
