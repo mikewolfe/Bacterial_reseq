@@ -1,0 +1,7 @@
+channels:
+    - conda-forge
+    - bioconda
+dependencies:
+    - breseq=0.35.5
+    - tbb=2020.2
+    - bowtie2=2.4.2

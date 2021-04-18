@@ -1,0 +1,9 @@
+preprocessing:
+        cutadapt_pe:
+            cut_param_string:
+                value: "-a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+        trimmomatic_pe:
+            trim_param_string:
+                value: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15"
+
+
