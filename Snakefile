@@ -67,7 +67,7 @@ include: "workflow/rules/preprocessing.smk"
 include: "workflow/rules/quality_control.smk"
 include: "workflow/rules/variant_calling.smk"
 include: "workflow/rules/test.smk"
-
+include: "workflow/rules/rename_breseq_output.smk"
 
 
 ## overall rules
