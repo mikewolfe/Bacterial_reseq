@@ -188,7 +188,7 @@ your error.
 
 # Version history
 
-Currently at version 0.0.0
+Currently at version 0.0.1
 
 See the [Changelog](CHANGELOG.md) for version history and upcoming
 features.

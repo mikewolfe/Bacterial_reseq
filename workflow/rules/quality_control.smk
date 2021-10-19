@@ -29,7 +29,7 @@ rule read_qc:
         touch("results/quality_control/read_qc.done")
 
 def match_fastq_to_sample(sample, pair, pep):
-    out = lookup_sample_metadata(sample, "file_path", pep)
+    out = lookup_sample_metadata(sample, "infile_path", pep)
     if pair == "R1":
         out += lookup_sample_metadata(sample, "filenameR1", pep)
     elif pair == "R2":

@@ -1,4 +1,4 @@
-# control of the pipeline
+#control of the pipeline
 configfile: "config/config.yaml"
 # sample metadata and information
 pepfile: "pep/config.yaml"
@@ -67,7 +67,6 @@ include: "workflow/rules/preprocessing.smk"
 include: "workflow/rules/quality_control.smk"
 include: "workflow/rules/variant_calling.smk"
 include: "workflow/rules/test.smk"
-
 
 
 ## overall rules

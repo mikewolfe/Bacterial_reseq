@@ -37,3 +37,23 @@ rule breseq:
         "-n {wildcards.sample} "
         "-o results/variant_calling/breseq/{wildcards.sample} "
         "-j {threads} > {log.stdout} 2> {log.stderr}"
+
+rule clean_rename:
+    shell:
+        "rm -fr results/variant_calling/breseq/renamed_output"
+
+rule run_rename:
+    input:
+        expand("results/variant_calling/breseq/renamed_output/{sample}.vcf", sample = samples(pep))
+
+rule rename_breseq_output:
+    input:
+        vcf="results/variant_calling/breseq/{sample}/output/output.vcf",
+        gd="results/variant_calling/breseq/{sample}/output/output.gd"
+    output:
+        outvcf="results/variant_calling/breseq/renamed_output/{sample}.vcf",
+        outgd="results/variant_calling/breseq/renamed_output/{sample}.gd"
+
+    threads: 1
+    shell:
+        "cp {input.vcf} {output.outvcf} && cp {input.gd} {output.outgd}"

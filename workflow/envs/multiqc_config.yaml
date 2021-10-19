@@ -18,3 +18,31 @@ module_order:
 report_section_order:
     fastq_trimmed:
         before: fastqc_raw
+
+extra_fn_clean_exts:
+    - type: remove
+      pattern: "trim_paired_"
+    - type: "truncate"
+      pattern: "R1"
+      module:
+          - trimmomatic
+          - cutadapt
+    - type: "truncate"
+      pattern: "R2"
+      module:
+          - trimmomatic
+          - cutadapt
+    - type: "truncate"
+      pattern: "cutadapt"
+      module:
+          - cutadapt
+    - type: "truncate"
+      pattern: "_cut"
+      module:
+          - trimmomatic
+
+use_filename_as_sample_name:
+    - fastqc
+    - cutadapt
+
+plots_flat_numseries: 250
