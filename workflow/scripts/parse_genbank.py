@@ -41,7 +41,7 @@ def check_partial_end(coord):
 
 
 
-def out_ptt_rnt(gb, ftype = "ptt", chrm = None, qual_name = "locus_tag"):
+def out_ptt_rnt(gb, ftype = "ptt", chrm = None, qual_names = ["locus_tag"]):
     # rockhopper only parses the genome name if it has >=5 fields split on
     # pipes. The 0-indexed [3] field is the name given to *_transcripts when
     # split on a "."
@@ -66,7 +66,7 @@ def out_ptt_rnt(gb, ftype = "ptt", chrm = None, qual_name = "locus_tag"):
 
     all_features = []
     ptt_rnt_name = set()
-    for NA_num, feature in enumerate(gb.features):
+    for feature in gb.features:
         outstr = ""
         if feature.type in features:
         # in one-based coordinates need to adjust
@@ -76,7 +76,7 @@ def out_ptt_rnt(gb, ftype = "ptt", chrm = None, qual_name = "locus_tag"):
             outstr += str(feature.qualifiers.get("protein_id", ["-"])[0]) + "\t"
             # often times things need a gene name, thus will replace with locus tag or
             # if that doesn't exist. NA_number
-            unique_name = str(feature.qualifiers.get(qual_name, ["%s_%d"%(unknown_name,NA_num)])[0])
+            unique_name = check_qualifiers(feature, qual_names, unknown_name = unknown_name)
             num = 1
             id_name = unique_name
             while id_name in ptt_rnt_name:
@@ -96,7 +96,7 @@ def out_ptt_rnt(gb, ftype = "ptt", chrm = None, qual_name = "locus_tag"):
         sys.stdout.write(feature + "\n")
 
 
-def out_tsv(gb, chrm = None, features = ["CDS"], qual_name = "locus_tag"):
+def out_tsv(gb, chrm = None, features = ["CDS"], qual_names = ["locus_tag"]):
     """
     Gives unique name, locus tag, gene name, and product for a given set
     """
@@ -107,7 +107,7 @@ def out_tsv(gb, chrm = None, features = ["CDS"], qual_name = "locus_tag"):
 
     sys.stdout.write("chr\tstart\tend\tstrand\tfeature_type\tunique_name\tlocus_tag\tprotein_id\tgene\tproduct\n")
     tsv_name = set()
-    for NA_num, feature in enumerate(gb.features):
+    for feature in gb.features:
         outstr = ""
         if feature.type in features:
             # skip features with partial ends
@@ -119,7 +119,7 @@ def out_tsv(gb, chrm = None, features = ["CDS"], qual_name = "locus_tag"):
             outstr += str(convert_strandval(feature.location.strand)) + "\t"
             outstr += str(feature.type) + "\t"
             #figure out unique name
-            unique_name = str(feature.qualifiers.get(qual_name, ["%s_%d"%("NA",NA_num)])[0])
+            unique_name = check_qualifiers(feature, qual_names)
             num = 1
             id_name = unique_name
             while id_name in tsv_name:
@@ -144,14 +144,14 @@ def out_tsv(gb, chrm = None, features = ["CDS"], qual_name = "locus_tag"):
             sys.stdout.write(outstr)
 
 
-def out_bed(gb, features = ["CDS"], chrm = None, qual_name = "locus_tag"):
+def out_bed(gb, features = ["CDS"], chrm = None, qual_names = ["locus_tag"]):
     if chrm:
         name = str(chrm)
     else:
         name = str(gb.name)
 
     bed_name = set()
-    for NA_num, feature in enumerate(gb.features):
+    for feature in gb.features:
         if feature.type in features:
             # skip features with partial ends
             if check_partial_start(feature.location.start) or check_partial_end(feature.location.end):
@@ -162,7 +162,7 @@ def out_bed(gb, features = ["CDS"], chrm = None, qual_name = "locus_tag"):
             outstr += str(feature.location.end) + "\t"
             # often times things need a gene name, thus will replace with locus tag or
             # if that doesn't exist. NA_number
-            unique_name = str(feature.qualifiers.get(qual_name, ["%s_%d"%("NA",NA_num)])[0])
+            unique_name = check_qualifiers(feature, qual_names)
             num = 1
             id_name = unique_name
             while id_name in bed_name:
@@ -208,15 +208,19 @@ def out_gff(gb, features = ["CDS"], chrm = None):
             outstr += convert_qualifiers_to_string(feature.qualifiers) + "\n"
             sys.stdout.write(outstr)
 
-def out_fasta(gb, features = ["CDS"], qual_name = "locus_tag"):
+def out_fasta(gb, features = ["CDS"], qual_names = ["locus_tag"]):
     import fasta as fa
     out_fasta = fa.FastaFile()
     fa_name = set()
-    for NA_num, feature in enumerate(gb.features):
+    for feature in gb.features:
         if feature.type in features:
+            # skip features with partial ends
+            if check_partial_start(feature.location.start) or check_partial_end(feature.location.end):
+                continue
+
             # often times things need a gene name, thus will replace with locus tag or
             # if that doesn't exist. NA_number
-            unique_name = str(feature.qualifiers.get(qual_name, ["%s_%d"%("NA",NA_num)])[0])
+            unique_name = check_qualifiers(feature, qual_names)
             num = 1
             id_name = unique_name
             while id_name in fa_name:
@@ -243,6 +247,14 @@ def out_fna(gb, chrm = None):
     out_fasta.add_entry(entry)
     out_fasta.write(sys.stdout)
 
+def check_qualifiers(entry, qual_names, unknown_name = "NA"):
+    for qual in qual_names:
+        if qual in entry.qualifiers:
+            return str(entry.qualifiers.get(qual)[0])
+    return unknown_name
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse a genbank file for features")
     parser.add_argument("infile", type=str, help="path to input file")
@@ -261,8 +273,8 @@ if __name__ == "__main__":
     parser.add_argument('--chrm', type=str, help='''
     specify the chromosome name for the output
     ''', default = None)
-    parser.add_argument('--qual_name', type=str, help='''
-    which qualifier field to parse to get name of feature? Default = locus_tag
+    parser.add_argument('--qual_name', type=str, nargs = "+", help='''
+    which qualifier fields to parse to get name of feature? If multiple are listed, will check in order until a field is filled in. Default = locus_tag
     ''', default = "locus_tag")
     args = parser.parse_args()
 
@@ -274,14 +286,14 @@ if __name__ == "__main__":
     with open(fname, mode = "r") as inf:
         gb = SeqIO.read(inf, "genbank")
     if ftype == "fasta" or ftype == "fa":
-        out_fasta(gb, features, qual_name = qual_name)
+        out_fasta(gb, features, qual_names = qual_name)
     elif ftype == "bed":
-        out_bed(gb, features, chrm = chrm, qual_name = qual_name)
+        out_bed(gb, features, chrm = chrm, qual_names = qual_name)
     elif ftype == "ptt" or ftype == "rnt":
-        out_ptt_rnt(gb, ftype, chrm = chrm, qual_name = qual_name)
+        out_ptt_rnt(gb, ftype, chrm = chrm, qual_names = qual_name)
     elif ftype == "gff":
         out_gff(gb, features, chrm = chrm)
     elif ftype == "fna":
         out_fna(gb, chrm = chrm)
     elif ftype == "tsv":
-        out_tsv(gb, chrm = chrm, features = features, qual_name = qual_name)
+        out_tsv(gb, chrm = chrm, features = features, qual_names = qual_name)
