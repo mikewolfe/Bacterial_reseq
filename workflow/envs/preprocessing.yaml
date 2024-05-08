@@ -2,5 +2,5 @@ channels:
     - conda-forge
     - bioconda
 dependencies:
-    - cutadapt=2.10
-    - trimmomatic=0.39
+    - cutadapt>=2.10
+    - trimmomatic>=0.39

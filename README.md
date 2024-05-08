@@ -39,19 +39,8 @@ Once `miniconda` is installed, both `snakemake` and `peppy` can be
 installed in their own environment easily using: 
 
 ``` 
-conda create -n Bacterial_reseq snakemake=5.24.2 peppy 
+conda create -n Bacterial_reseq snakemake>=5.24.2 peppy 
 conda activate Bacterial_reseq
-```
-
-**Note** If you are using a computational cluster that requires job
-management software, you may want to install that with your
-environment as well.  For example, if you are using an
-`htcondor`-managed server you would instead create your environment
-like so: 
-
-``` 
-conda create -n Bacterial_reseq snakemake=5.24.2 peppy htcondor=8.9.5 
-conda activate Bacterial_reseq 
 ```
 
 Now you can pull the pipeline from GitHub using: 
@@ -63,14 +52,6 @@ And you can change into the newly cloned `Bacterial_reseq` directory
 and test your installation with: 
 ``` 
 snakemake --use-conda --cores 10
-```
-
-Or if using a cluster with job management software you can run this
-with an environment-specific
-[profile](https://snakemake.readthedocs.io/en/v5.1.4/executable.html#profiles).
-For example: 
-``` 
-snakemake --use-conda --cores 10 --profile htcondor
 ```
 
 This will create a small test data set consisting of example fastqs
@@ -90,6 +71,61 @@ results from the test data using:
 ```
 snakemake clean_all --cores 1
 ```
+
+## If installing on a job-managed computational cluster (like HT-condor)
+
+If you are using a computational cluster that requires job management
+software, you will want to install the required job management software with
+your environment as well.  For example, if you are using an
+`htcondor`-managed server you would instead create your environment
+like so: 
+
+``` 
+conda create -n Bacterial_reseq snakemake>=5.24.2 peppy htcondor>=8.9.5 
+conda activate Bacterial_reseq 
+```
+
+And then run the pipeline using the job management software
+with an environment-specific
+[profile](https://snakemake.readthedocs.io/en/v5.1.4/executable.html#profiles).
+
+For example: 
+``` 
+snakemake --use-conda --cores 10 --profile htcondor
+```
+
+## If installing on an ARM-based Mac (i.e. 2020 M1 Chips and beyond)
+
+Many of the bioinformatic packages in this pipeline still do not have ARM-based
+binaries available for download through `conda`. Luckily, there is an easy
+workaround.
+
+Apple has `Rosetta` software that will translate instruction sets from
+programs compiled for intel to the AMD processor. First you need to install
+`Rosetta` to your computer. Instructions are
+[here](https://support.apple.com/en-us/102527).
+
+Next you need to set `conda` to look for intel-based programs rather than AMD
+based programs. This is a simple as adding the following line to your `.condarc`
+in your home directory: `subdir: osx-64`. Your overall `.condarc` should now
+look like this:
+
+```
+channel_priority: 'strict'
+channels:
+  - conda-forge
+  - bioconda
+subdir: osx-64
+```
+
+Now install the running environment as before:
+
+``` 
+conda create -n Bacterial_reseq snakemake>=5.24.2 peppy htcondor>=8.9.5 
+conda activate Bacterial_reseq 
+```
+
+And run the pipeline as described below.
 
 # Running the pipeline
 
@@ -151,6 +187,9 @@ task needed for analysis.
 - [workflow/rules/quality_control.smk](workflow/rules/quality_control.smk)
   includes rules for performing summarizing quality control on the
   reads themselves
+- [workflow/rules/assembly.smk](workflow/rules/assembly.smk)
+  includes rules for doing de novo assembly with `unicycler` and report
+  generation with `quast`
 - [workflow/rules/test.smk](workflow/rules/test.smk)
   includes rules for creating the small test set.
 
@@ -188,7 +227,7 @@ your error.
 
 # Version history
 
-Currently at version 0.0.1
+Currently at version 0.0.2
 
 See the [Changelog](CHANGELOG.md) for version history and upcoming
 features.
