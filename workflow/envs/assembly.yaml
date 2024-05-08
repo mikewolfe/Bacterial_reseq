@@ -2,5 +2,6 @@ channels:
     - conda-forge
     - bioconda
 dependencies:
-    - cutadapt>=2.10
-    - trimmomatic>=0.39
+    - unicycler>=0.4.8
+    - spades>=3.15.2
+    - quast

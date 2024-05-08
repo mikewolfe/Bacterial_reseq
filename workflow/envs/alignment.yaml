@@ -1,0 +1,9 @@
+channels:
+    - conda-forge
+    - bioconda
+dependencies:
+    - bowtie2>=2.4.2
+    - tbb>=2020.2
+    - samtools>=1.10
+    - biopython>=1.78
+    - ncbi-acc-download>=0.2.6

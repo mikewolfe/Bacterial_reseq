@@ -67,13 +67,27 @@ include: "workflow/rules/preprocessing.smk"
 include: "workflow/rules/quality_control.smk"
 include: "workflow/rules/variant_calling.smk"
 include: "workflow/rules/test.smk"
+include: "workflow/rules/alignment.smk"
+include: "workflow/rules/assembly.smk"
 
 
 ## overall rules
 
+rule run_variant_calling:
+    input: 
+        expand("results/variant_calling/breseq/{sample}/output/summary.html", \
+        sample = samples(pep))
+
 rule run_all:
     input: 
         expand("results/variant_calling/breseq/{sample}/output/summary.html", \
+        sample = samples(pep)),
+        expand("results/assembly/quast/{sample}/report.txt", \
+        sample = samples(pep))
+
+rule run_assembly:
+    input: 
+        expand("results/assembly/quast/{sample}/report.txt", \
         sample = samples(pep))
 
 rule clean_all:

@@ -1,10 +1,10 @@
-rule pull_genbank:
+rule pull_genbank_test:
     message: "Download genbank for {wildcards.accession}"
     output:
         "results/test/references/{accession}.gbk"
     log:
-        stdout="results/alignment/logs/pull_genbank/{accession}.log",
-        stderr="results/alignment/logs/pull_genbank/{accession}.err"
+        stdout="results/test/logs/pull_genbank/{accession}.log",
+        stderr="results/test/logs/pull_genbank/{accession}.err"
     threads: 1
     conda:
         "../envs/test.yaml"
@@ -23,7 +23,7 @@ def pull_reference_seqs(sample, pep):
     return fasta_names
         
 
-rule combine_fastas:
+rule combine_fastas_test:
     message: "Generating fasta for sample {wildcards.sample}"
     input:
         input_files = lambda wildcards: pull_reference_seqs(wildcards.sample, pep),
@@ -31,8 +31,8 @@ rule combine_fastas:
     output:
         "results/test/combine_fasta/{sample}.fa"
     log:
-        stdout="results/alignment/logs/combine_fasta/{sample}.log",
-        stderr="results/alignment/logs/combine_fasta/{sample}.err"
+        stdout="results/test/logs/combine_fasta/{sample}.log",
+        stderr="results/test/logs/combine_fasta/{sample}.err"
     threads: 1
     conda:
         "../envs/test.yaml"
@@ -44,7 +44,7 @@ rule combine_fastas:
          "> {log.stdout} 2> {log.stderr}"
 
 
-rule process_genbank:
+rule process_genbank_test:
     message: "Processing genbank for {wildcards.accession}"
     input:
         "results/test/references/{accession}.gbk"
