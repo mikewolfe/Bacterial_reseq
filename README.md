@@ -90,17 +90,18 @@ with an environment-specific
 [profile](https://snakemake.readthedocs.io/en/v5.1.4/executable.html#profiles).
 
 For running with `htcondor` I have included an example profile in
-`htcondor_profile/`. This is based on the work-in-progress v8.0
-profile [here](https://github.com/Snakemake-Profiles/htcondor).
+[htcondor_profile/](htcondor_profile/). This is based on the
+work-in-progress v8.0 profile
+[here](https://github.com/Snakemake-Profiles/htcondor).
 
 To get this setup do the following:
 - Create the directory `~/.config/snakemake/htcondor`
-- Copy the files in `htcondor_profile` over to
+- Copy the files in [htcondor_profile/](htcondor_profile/) over to
   `~/.config/snakemake/htcondor`
 - Create the directory `~/.condor_jobs`
 
 Then you should be able to run the pipeline with `snakemake` version
->8.0 and automatic submission of jobs through `htcondor` using:
+8.0 and automatic submission of jobs through `htcondor` using:
 
 ``` 
 snakemake --use-conda --cores 10 --profile htcondor
