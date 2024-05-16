@@ -75,7 +75,7 @@ include: "workflow/rules/assembly.smk"
 
 rule run_variant_calling:
     input: 
-        expand("results/variant_calling/breseq/{sample}/output/summary.html", \
+        expand("results/variant_calling/breseq/renamed_output/{sample}.tsv", \
         sample = samples(pep))
 
 rule run_all:

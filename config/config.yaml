@@ -5,5 +5,9 @@ preprocessing:
         trimmomatic_pe:
             trim_param_string:
                 value: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15"
+variant_calling:
+    breseq:
+        breseq_param_string:
+            value: " "
 
 

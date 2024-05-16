@@ -1,4 +1,4 @@
-[![Snakemake](https://img.shields.io/badge/snakemake-≥5.24.2-brightgreen.svg)](https://snakemake.bitbucket.io) [![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pepkit.github.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥8.0-brightgreen.svg)](https://snakemake.bitbucket.io) [![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pepkit.github.io)
 # Pipeline for processing bacterial re-sequencing data
 
 The goal of this project is to create a reproducible analysis pipeline
@@ -39,7 +39,7 @@ Once `miniconda` is installed, both `snakemake` and `peppy` can be
 installed in their own environment easily using: 
 
 ``` 
-conda create -n Bacterial_reseq snakemake>=5.24.2 peppy 
+conda create -n Bacterial_reseq snakemake>=8 peppy 
 conda activate Bacterial_reseq
 ```
 
@@ -81,7 +81,7 @@ your environment as well.  For example, if you are using an
 like so: 
 
 ``` 
-conda create -n Bacterial_reseq snakemake>=5.24.2 peppy htcondor>=8.9.5 
+conda create -n Bacterial_reseq snakemake>=8.0 peppy htcondor>=8.9.5 snakemake-executor-plugin-cluster-generic
 conda activate Bacterial_reseq 
 ```
 
@@ -89,10 +89,22 @@ And then run the pipeline using the job management software
 with an environment-specific
 [profile](https://snakemake.readthedocs.io/en/v5.1.4/executable.html#profiles).
 
-For example: 
+For running with `htcondor` I have included an example profile in
+`htcondor_profile/`. 
+
+To get this setup do the following:
+- Create the directory `~/.config/snakemake/htcondor`
+- Copy the files in `htcondor_profile` over to
+  `~/.config/snakemake/htcondor`
+- Create the directory `~/.condor_jobs`
+
+Then you should be able to run the pipeline with `snakemake` version
+>8.0 and automatic submission of jobs through `htcondor` using:
+
 ``` 
 snakemake --use-conda --cores 10 --profile htcondor
 ```
+
 
 ## If installing on an ARM-based Mac (i.e. 2020 M1 Chips and beyond)
 
