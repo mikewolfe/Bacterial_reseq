@@ -23,10 +23,15 @@ rule breseq:
         fastq_R2 = "results/preprocessing/trimmomatic/{sample}_trim_paired_R2.fastq.gz",
         reference_files = lambda wildcards: get_references_per_sample(wildcards.sample, pep)
     output:
-        "results/variant_calling/breseq/{sample}/output/summary.html"
+        "results/variant_calling/breseq/{sample}/output/summary.html",
+        "results/variant_calling/breseq/{sample}/output/output.vcf",
+        "results/variant_calling/breseq/{sample}/output/output.gd"
     threads: 10
     params:
-        reference_file_string = lambda wildcards: format_references_per_sample(wildcards.sample, pep)
+        reference_file_string = lambda wildcards: format_references_per_sample(wildcards.sample, pep),
+        breseq_param_string = lambda wildcards: lookup_in_config_persample(config, pep, \
+        ["variant_calling", "breseq", "breseq_param_string"], wildcards.sample, \
+        default = " ")
     log:
         stdout="results/variant_calling/logs/breseq/{sample}.log",
         stderr="results/variant_calling/logs/breseq/{sample}.err"
@@ -36,7 +41,9 @@ rule breseq:
         "breseq {params.reference_file_string} {input.fastq_R1} {input.fastq_R2} "
         "-n {wildcards.sample} "
         "-o results/variant_calling/breseq/{wildcards.sample} "
-        "-j {threads} > {log.stdout} 2> {log.stderr}"
+        "-j {threads} "
+        "{params.breseq_param_string} "
+        "> {log.stdout} 2> {log.stderr}"
 
 rule clean_rename:
     shell:
@@ -57,3 +64,19 @@ rule rename_breseq_output:
     threads: 1
     shell:
         "cp {input.vcf} {output.outvcf} && cp {input.gd} {output.outgd}"
+
+rule breseq_output_tsv:
+    input:
+       "results/variant_calling/breseq/renamed_output/{sample}.gd"
+    output:
+        "results/variant_calling/breseq/renamed_output/{sample}.tsv"
+    conda:
+        "../envs/variant_calling.yaml"
+    params:
+        reference_file_string = lambda wildcards: format_references_per_sample(wildcards.sample, pep)
+    log:
+        stdout="results/variant_calling/logs/breseq/{sample}_to_tsv.log",
+        stderr="results/variant_calling/logs/breseq/{sample}_to_tsv.err"
+    shell:
+        "gdtools ANNOTATE {params.reference_file_string} -f TSV "
+        "-o {output} {input} > {log.stdout} 2> {log.stderr}"

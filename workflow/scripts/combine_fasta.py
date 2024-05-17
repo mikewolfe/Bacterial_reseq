@@ -10,6 +10,7 @@ if __name__ == "__main__":
     parser.add_argument('infiles', type=str, nargs='+', help="files to combine")
     parser.add_argument('--masked_regions', type=str,
             help="A .bed file containing a list of regions to replace with Ns")
+    parser.add_argument('--masked_delete', action = "store_true", help = "delete masked regions?")
     
     args = parser.parse_args()
     genome_name = args.outfilepre
@@ -37,6 +38,8 @@ if __name__ == "__main__":
             total_region_length = entry["end"] - entry["start"]
             this_chrm = final_fasta.pull_entry(entry["chrm"])
             this_chrm.mutate(entry["start"], entry["end"], "N"*total_region_length)
+        if args.masked_delete:
+            this_chrm.delete_Ns()
 
     # Figure out total size of each chromosome
     with open(genome_name + "_contig_sizes.tsv", mode = "w") as outf:

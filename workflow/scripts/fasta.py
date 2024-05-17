@@ -93,7 +93,15 @@ class FastaEntry(object):
         total_size = len(self.seq)
         self.seq = self.seq[0:start] + new_seq + self.seq[end:total_size]
 
+    def delete_Ns(self):
+        """
+        Delete any Ns in the sequence shortening it as a result
 
+        Returns:
+            Nothing. self.seq is altered in place
+        """
+
+        self.seq = self.seq.replace("N", "")
 
     def __len__(self):
         if self.length:

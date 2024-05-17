@@ -41,6 +41,7 @@ rule combine_fastas_test:
          "results/test/combine_fasta/{wildcards.sample} "
          "{input.input_files} "
          "--masked_regions {input.mask_regions} "
+         "--masked_delete "
          "> {log.stdout} 2> {log.stderr}"
 
 
