@@ -16,6 +16,46 @@ def lookup_sample_metadata(sample, key, pep):
     """
     return pep.sample_table.at[sample, key]
 
+def determine_fastqs_to_combine(sample, pair, pep):
+    path = lookup_sample_metadata(sample, "infile_path", pep)
+    if pair == "R1" or pair == "R0":
+        file_list = lookup_sample_metadata(sample, "filenameR1", pep)
+    elif pair == "R2":
+        file_list = lookup_sample_metadata(sample, "filenameR2", pep)
+    else:
+        raise ValueError("Pair must be R0 (single-end), R1, or R2 not %s"%pair)
+    out = []
+    for this_file in file_list.split(";"):
+        out.append(path + this_file)
+    return out
+        
+def match_fastq_to_sample(sample, pair, pep):
+    path = lookup_sample_metadata(sample, "infile_path", pep)
+    if pair == "R1" or pair == "R0":
+        file_list = lookup_sample_metadata(sample, "filenameR1", pep)
+    elif pair == "R2":
+        file_list = lookup_sample_metadata(sample, "filenameR2", pep)
+    else:
+        raise ValueError("Pair must be R0 (single-end), R1, or R2 not %s"%pair)
+    if len(file_list.split(";")) > 1:
+        out = "results/preprocessing/combine_fastq/" + sample + "_" + pair + "_combined.fastq.gz"
+    else:
+        out = path + file_list
+    return out
+
+
+def determine_single_end(sample, pep):
+    from pandas import isna
+    if "filenameR2" in pep.sample_table:
+        r2 = lookup_sample_metadata(sample, "filenameR2", pep)
+        if isna(r2) or r2 == "":
+            out = True
+        else:
+            out = False
+    else:
+        out = True
+    return out
+
 def lookup_in_config(config, keys, default = None):
     curr_dict = config
     try:

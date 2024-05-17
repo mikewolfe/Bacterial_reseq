@@ -177,6 +177,32 @@ rule bowtie2_map:
         "{params.bowtie2_param_string} 2> {log.stderr} "
         "| samtools view {params.samtools_view_param_string} > {output}"
 
+rule bowtie2_map_se:
+    input:
+        in1="results/preprocessing/trimmomatic/{sample}_trim_R0.fastq.gz",
+        bt2_index_file= lambda wildcards: get_bt2_index_file(wildcards.sample,pep)
+    output:
+        temp("results/alignment/bowtie2/{sample}.bam")
+    log:
+        stderr="results/alignment/logs/bowtie2/{sample}_bt2.log" 
+    params:
+        bt2_index= lambda wildcards: get_bt2_index(wildcards.sample,pep),
+        bowtie2_param_string= lambda wildcards: lookup_in_config_persample(config,\
+        pep, ["alignment", "bowtie2_map_se", "bowtie2_param_string"], wildcards.sample,\
+        "--end-to-end --very-sensitive --phred33"),
+        samtools_view_param_string = lambda wildcards: lookup_in_config_persample(config,\
+        pep, ["alignment", "bowtie2_map_se", "samtools_view_param_string"],\
+        wildcards.sample, "-b")
+    threads: 
+        5
+    conda:
+        "../envs/alignment.yaml"
+    shell:
+        "bowtie2 -x {params.bt2_index} -p {threads} "
+        "-U {input.in1} "
+        "{params.bowtie2_param_string} 2> {log.stderr} "
+        "| samtools view {params.samtools_view_param_string} > {output}"
+
 rule bam_sort:
     input:
         "results/alignment/bowtie2/{sample}.bam"

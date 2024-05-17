@@ -1,3 +1,4 @@
 sample_name,filenameR1,filenameR2,infile_path,reference_files,reference_path
 U00096_3_test,U00096_3_test_R1.fastq.gz,U00096_3_test_R2.fastq.gz,results/test/input_fastqs/,U00096.3.gbk,results/test/references/
 ZM4_test,ZM4_test_R1.fastq.gz,ZM4_test_R2.fastq.gz,results/test/input_fastqs/,CP023715.1.gbk;CP023716.1.gbk;CP023717.1.gbk;CP023718.1.gbk;CP023719.1.gbk,results/test/references/
+ZM4_test_se,ZM4_test_R1.fastq.gz,,results/test/input_fastqs/,CP023715.1.gbk;CP023716.1.gbk;CP023717.1.gbk;CP023718.1.gbk;CP023719.1.gbk,results/test/references/

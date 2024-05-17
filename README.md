@@ -241,7 +241,7 @@ your error.
 
 # Version history
 
-Currently at version 0.0.3
+Currently at version 0.0.4
 
 See the [Changelog](CHANGELOG.md) for version history and upcoming
 features.
