@@ -83,4 +83,27 @@ rule sample_fastqs:
         "results/test/input_fastqs/{wildcards.sample} "
         "{params.sample_param_string} "
         "> {log.stdout} 2> {log.stderr}"
+
+
+rule sample_fastqs_se:
+    message: "Sampling for test sample {wildcards.sample}"
+    input:
+        "results/test/combine_fasta/{sample}.fa"
+    output:
+        "results/test/input_fastqs/{sample}_R0.fastq.gz",
+    log:
+        stdout="results/test/logs/sample_fastqs_se/{sample}.log",
+        stderr="results/test/logs/sample_fastqs_se/{sample}.err"
+    params:
+        sample_param_string = lambda wildcards: lookup_in_config_persample(config,
+        pep, ["test", "sample_fastqs", "sample_se_param_string"], wildcards.sample,
+        default = "--rng_seed 42")
+    conda:
+        "../envs/test.yaml"
+    shell:
+        "python3 workflow/scripts/FastqSim.py {input} "
+        "results/test/input_fastqs/{wildcards.sample} "
+        "{params.sample_param_string} "
+        "--single_end "
+        "> {log.stdout} 2> {log.stderr}"
         

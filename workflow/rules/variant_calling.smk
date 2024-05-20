@@ -15,6 +15,7 @@ def format_references_per_sample(sample, pep):
         out_str += "-r %s "%(this_file)
     return out_str
 
+    
 
 def processed_fastqs(sample, pep):
     se = determine_single_end(sample, pep)
@@ -26,10 +27,34 @@ def processed_fastqs(sample, pep):
         out.append("results/preprocessing/trimmomatic/%s_trim_paired_R2.fastq.gz"%(sample))
     return out
 
+
+def raw_fastqs(sample, pep):
+    se = determine_single_end(sample, pep)
+    out = []
+    if se:
+        out.append(match_fastq_to_sample(sample, "R0", pep))
+    else:
+        out.append(match_fastq_to_sample(sample, "R1", pep))
+        out.append(match_fastq_to_sample(sample, "R2", pep))
+    return out
+
+def determine_breseq_input(sample, pep):
+    infile_type = lookup_in_config_persample(config, pep,\
+    ["variant_calling", "breseq", "file_sig"], "processed")
+    if infile_type == "processed":
+        out = processed_fastqs(sample, pep)
+    elif infile_type == "raw":
+        out = raw_fastqs(sample, pep)
+    else:
+        raise ValueError("File sig must be either 'raw' or 'processed' for breseq")
+    return out
+
+        
+
 rule breseq:
     message: "Running breseq on {wildcards.sample}"
     input:
-        processed_fastqs = lambda wildcards: processed_fastqs(wildcards.sample, pep),
+        processed_fastqs = lambda wildcards: determine_breseq_input(wildcards.sample, pep),
         reference_files = lambda wildcards: get_references_per_sample(wildcards.sample, pep)
     output:
         "results/variant_calling/breseq/{sample}/output/summary.html",
