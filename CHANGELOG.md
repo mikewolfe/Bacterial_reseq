@@ -11,6 +11,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 - support for single end data and long read data
+- support for running no preprocessing of reads
 
 ## 0.0.3 - 2024-05-16
 

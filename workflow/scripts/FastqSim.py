@@ -25,16 +25,16 @@ class FragmentLengthDistro(object):
         self.center = center
         self.spread = spread
 
-    def generate_length(self, rng):
-        return int(rng.normal(self.center, self.spread))
+    def generate_length(self, rng, max_size = int(5e6)):
+        return min(max_size, int(rng.normal(self.center, self.spread)))
 
 class ReadLengthDistro(object):
     def __init__(self, center, spread):
         self.center = center
         self.spread = spread
 
-    def generate_length(self, rng):
-        return int(rng.normal(self.center, self.spread))
+    def generate_length(self, rng, max_size = int(5e6)):
+        return min(max_size, int(rng.normal(self.center, self.spread)))
 
 class ReadSampler(object):
     def __init__(self, length_distro, fragment_distro, quality_distro, fasta):

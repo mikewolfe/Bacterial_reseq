@@ -9,7 +9,7 @@ preprocessing:
 test:
     sample_fastqs:
         sample_se_param_string:
-            value: "--fragment_length_mean 50000 --fragment_length_std 100 --num_fragments 30000"
+            value: "--fragment_length_mean 20000 --fragment_length_std 5 --num_fragments 3000"
 variant_calling:
     breseq:
         breseq_param_string:
