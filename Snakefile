@@ -14,7 +14,11 @@ def lookup_sample_metadata(sample, key, pep):
     """
     Get sample metadata by key
     """
-    return pep.sample_table.at[sample, key]
+    if key in pep.sample_table.columns:
+        out = pep.sample_table.at[sample, key]
+    else:
+        raise KeyError("Column %s not found in sample sheet!"%key)
+    return out
 
 def determine_fastqs_to_combine(sample, pair, pep):
     path = lookup_sample_metadata(sample, "infile_path", pep)

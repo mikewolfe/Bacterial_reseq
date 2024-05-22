@@ -40,7 +40,7 @@ def raw_fastqs(sample, pep):
 
 def determine_breseq_input(sample, pep):
     infile_type = lookup_in_config_persample(config, pep,\
-    ["variant_calling", "breseq", "file_sig"], "processed")
+    ["variant_calling", "breseq", "file_sig"], sample, "processed")
     if infile_type == "processed":
         out = processed_fastqs(sample, pep)
     elif infile_type == "raw":

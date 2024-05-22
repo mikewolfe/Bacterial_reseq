@@ -12,9 +12,23 @@ test:
             value: "--fragment_length_mean 20000 --fragment_length_std 5 --num_fragments 3000"
 variant_calling:
     breseq:
+        # Add extra parameters for breseq calls?
+        # ONT data should have the "--nanopore" flag
+        # Here we specify by column in the sample sheet
         breseq_param_string:
-            value: " "
+            column: 
+                "breseq_params"
+        # do you want to precut the files or run on the raw data?
+        # For ONT data you can just run on the raw files
+        # For illumina data it sometimes helps to cut off adaptors
         file_sig:
-            value: "raw"
+            # This just looks in the 'file_to_run' column of the sample sheet
+            # to decide rather to run on the 'raw' data or the 'processed'
+            # data.
+            #
+            # You can also specify the same value for all samples by doing
+            # "value: 'processed'"
+            column: 
+                "file_to_run"
 
 
