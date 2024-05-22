@@ -6,7 +6,7 @@ import bed_utils as bed
 import gzip
 
 class QualityDistro(object):
-    def __init__(self, max_length = 500):
+    def __init__(self, max_length = int(5e6)):
         self.center_per_pos = np.zeros(max_length, dtype=int)
         self.spread_per_pos = np.zeros(max_length, dtype=float)
 
@@ -25,16 +25,16 @@ class FragmentLengthDistro(object):
         self.center = center
         self.spread = spread
 
-    def generate_length(self, rng):
-        return int(rng.normal(self.center, self.spread))
+    def generate_length(self, rng, max_size = int(5e6)):
+        return min(max_size, int(rng.normal(self.center, self.spread)))
 
 class ReadLengthDistro(object):
     def __init__(self, center, spread):
         self.center = center
         self.spread = spread
 
-    def generate_length(self, rng):
-        return int(rng.normal(self.center, self.spread))
+    def generate_length(self, rng, max_size = int(5e6)):
+        return min(max_size, int(rng.normal(self.center, self.spread)))
 
 class ReadSampler(object):
     def __init__(self, length_distro, fragment_distro, quality_distro, fasta):
@@ -43,9 +43,12 @@ class ReadSampler(object):
         self.quality_distro = quality_distro
         self.fasta = fasta
 
-    def generate_read(self, name, chrm, loc, strand, rng):
+    def generate_read(self, name, chrm, loc, strand, rng, full_length = None):
         name = "@%s"%(name)
-        length = self.length_distro.generate_length(rng)
+        if full_length is not None:
+            length = full_length
+        else:
+            length = self.length_distro.generate_length(rng)
         quality = self.quality_distro.generate_quality(length, rng)
         if strand == "-":
             # have to shift register by one to match properly
@@ -54,6 +57,18 @@ class ReadSampler(object):
             seq = self.fasta.pull_entry(chrm).pull_seq(loc, loc+length, rc = False, circ = True)
 
         return fq.FastqEntry(name = name, seq= seq, qual = quality)
+
+    def generate_singleend(self, chrm, loc, rng):
+        fragment_length = self.fragment_distro.generate_length(rng)
+        fragment_strand = rng.choice(["-", "+"])
+        five_loc = int(loc - fragment_length/2)
+        three_loc = int(loc + fragment_length/2)
+        name = "%s_%s_%s"%(chrm, loc, fragment_strand)
+        if fragment_strand == "-":
+            R0 = self.generate_read(name, chrm, three_loc, fragment_strand, rng, full_length = fragment_length)
+        else:
+            R0 = self.generate_read(name, chrm, five_loc, fragment_strand, rng, full_length = fragment_length)
+        return R0
 
     def generate_read_pair(self, chrm, loc, rng):
 
@@ -157,6 +172,8 @@ if __name__ == "__main__":
             help = "Average read length (Default = 30)", default = 30)
     parser.add_argument("--read_length_std", type = int,
             help = "Std read length (Default = 0.0001)", default = 0.0001)
+    parser.add_argument("--single_end", action = "store_true",
+            help = "Generate single end data rather than pairs")
     args = parser.parse_args()
     # input genome fasta
     infasta = args.infile
@@ -188,15 +205,23 @@ if __name__ == "__main__":
     read_length_distro = ReadLengthDistro(args.read_length_mean, args.read_length_std)
 
     reads = ReadSampler(read_length_distro, fragment_distro, qual_distro, genome)
-
-    out_R1 = gzip.open(out_prefix + "_R1.fastq.gz", mode ="wb")
-    out_R2 = gzip.open(out_prefix + "_R2.fastq.gz", mode = "wb")
     
     all_locs = locations.simulate(n_fragments, rng)
-    for key in all_locs.keys():
-        for loc in all_locs[key]:
-            R1, R2 = reads.generate_read_pair(key, loc, rng) 
-            out_R1.write(str(R1).encode())
-            out_R2.write(str(R2).encode())
-    out_R1.close()
-    out_R2.close()
+    if args.single_end:
+        out_R0 = gzip.open(out_prefix + "_R0.fastq.gz", mode = "wb")
+        for key in all_locs.keys():
+            for loc in all_locs[key]:
+                R0 = reads.generate_singleend(key, loc, rng) 
+                out_R0.write(str(R0).encode())
+        out_R0.close()
+    else:
+        out_R1 = gzip.open(out_prefix + "_R1.fastq.gz", mode ="wb")
+        out_R2 = gzip.open(out_prefix + "_R2.fastq.gz", mode = "wb")
+    
+        for key in all_locs.keys():
+            for loc in all_locs[key]:
+                R1, R2 = reads.generate_read_pair(key, loc, rng) 
+                out_R1.write(str(R1).encode())
+                out_R2.write(str(R2).encode())
+        out_R1.close()
+        out_R2.close()
